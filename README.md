@@ -10,3 +10,4 @@ Hardware:
 - IR sensor x 2
 - sound detector 
 - red Leds
+- motor x 2
