@@ -1,0 +1,24 @@
+PROGRAM AutomaticDoors
+  VAR
+    SensorIN AT %IX0.2 : BOOL;
+    SensorOUT AT %IX0.3 : BOOL;
+    SensorDoor AT %IX0.4 : BOOL;
+    SensorSound AT %IX1.5 : BOOL;
+    Motor1L AT %QX0.0 : BOOL;
+    Motor1R AT %QX0.1 : BOOL;
+    Motor2L AT %QX0.2 : BOOL;
+    Motor2R AT %QX0.3 : BOOL;
+    Lamp AT %QX0.4 : BOOL;
+  END_VAR
+
+  Lamp := NOT(SensorIN);
+END_PROGRAM
+
+
+CONFIGURATION Config0
+
+  RESOURCE Res0 ON PLC
+    TASK task0(INTERVAL := T#20ms,PRIORITY := 0);
+    PROGRAM instance0 WITH task0 : AutomaticDoors;
+  END_RESOURCE
+END_CONFIGURATION
