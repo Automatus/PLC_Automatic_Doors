@@ -6,7 +6,7 @@ INPUTS
 
 OUTPUTS
 %QX0.7 = Motor1ToIN   = pin 32 / GPIO12
-%QX0.1 = Motor1ToOUT  = pin 10 / GPIO15
+%QX1.2 = Motor1ToOUT  = pin 40 / GPIO21
 %QX0.2 = Motor2ToIN   = pin 16 / GPIO23
 %QX0.3 = Motor2ToOUT  = pin 18 / GPIO24
 %QX0.4 = Lamp         = pin 22 / GPIO25
