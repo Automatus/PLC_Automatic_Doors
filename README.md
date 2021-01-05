@@ -7,7 +7,7 @@ Hardware:
 - Raspberry pi
 - wifi dongle
 - usb hub
-- IR sensor x 2
+- IR sensor x 3
 - sound detector 
 - red Leds
 - motor x 2
