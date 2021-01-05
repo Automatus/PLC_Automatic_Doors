@@ -1,0 +1,74 @@
+PROGRAM AutomaticDoors
+  VAR
+    SensorIN AT %IX0.2 : BOOL;
+    SensorOUT AT %IX0.3 : BOOL;
+    SensorDoor AT %IX0.4 : BOOL;
+    SensorSound AT %IX1.5 : BOOL;
+    Motor1ToIN AT %QX0.7 : BOOL;
+    Motor1ToOUT AT %QX0.1 : BOOL;
+    Motor2ToIN AT %QX0.2 : BOOL;
+    Motor2ToOUT AT %QX0.3 : BOOL;
+    Lamp AT %QX0.4 : BOOL;
+  END_VAR
+  VAR
+    Door1Closed : BOOL;
+    DoorsPositionIsIN : BOOL;
+    DoorsPositionIsOUT : BOOL;
+    DoorsOpening : BOOL;
+    DoorsClosing : BOOL;
+    TOF1 : TOF;
+    TON0 : TON;
+    F_TRIG1 : F_TRIG;
+  END_VAR
+
+  TOF1(IN := NOT(DoorsClosing) AND NOT(DoorsOpening) AND (NOT(SensorIN) OR NOT(SensorOUT)), PT := T#3s);
+  IF TOF1.Q THEN
+    DoorsOpening := TRUE; (*set*)
+  END_IF;
+  IF TOF1.Q THEN
+    Door1Closed := FALSE; (*reset*)
+  END_IF;
+  IF NOT(SensorIN) AND TOF1.Q THEN
+    DoorsPositionIsOUT := TRUE; (*set*)
+  END_IF;
+  IF NOT(SensorOUT) AND TOF1.Q THEN
+    DoorsPositionIsIN := TRUE; (*set*)
+  END_IF;
+  Motor1ToOUT := DoorsPositionIsOUT AND TOF1.Q;
+  Motor2ToOUT := DoorsPositionIsOUT AND TOF1.Q;
+  Motor1ToIN := DoorsPositionIsIN AND TOF1.Q;
+  Motor2ToIN := DoorsPositionIsIN AND TOF1.Q;
+  TON0(IN := SensorOUT AND SensorIN AND DoorsOpening, PT := T#6s);
+  IF TON0.Q THEN
+    DoorsOpening := FALSE; (*reset*)
+  END_IF;
+  IF TON0.Q THEN
+    DoorsClosing := TRUE; (*set*)
+  END_IF;
+  Motor1ToOUT := NOT(Door1Closed) AND DoorsPositionIsIN AND NOT(SensorDoor) AND DoorsClosing;
+  Motor2ToOUT := DoorsPositionIsIN AND NOT(SensorDoor) AND DoorsClosing;
+  Motor1ToIN := NOT(Door1Closed) AND DoorsPositionIsOUT AND NOT(SensorDoor) AND DoorsClosing;
+  Motor2ToIN := DoorsPositionIsOUT AND NOT(SensorDoor) AND DoorsClosing;
+  F_TRIG1(CLK := SensorDoor);
+  IF NOT(Door1Closed) AND F_TRIG1.Q AND DoorsClosing THEN
+    Door1Closed := TRUE; (*set*)
+  END_IF;
+  IF Door1Closed AND SensorDoor AND DoorsClosing THEN
+    DoorsClosing := FALSE; (*reset*)
+  END_IF;
+  IF Door1Closed AND SensorDoor AND DoorsClosing THEN
+    DoorsPositionIsIN := FALSE; (*reset*)
+  END_IF;
+  IF Door1Closed AND SensorDoor AND DoorsClosing THEN
+    DoorsPositionIsOUT := FALSE; (*reset*)
+  END_IF;
+END_PROGRAM
+
+
+CONFIGURATION Config0
+
+  RESOURCE Res0 ON PLC
+    TASK task0(INTERVAL := T#20ms,PRIORITY := 0);
+    PROGRAM instance0 WITH task0 : AutomaticDoors;
+  END_RESOURCE
+END_CONFIGURATION
