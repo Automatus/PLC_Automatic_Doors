@@ -1,0 +1,12 @@
+INPUTS
+%IX0.2 = SensorIN     = pin 07 / GPIO4
+%IX0.3 = SensorOUT    = pin 11 / GPIO17
+%IX0.4 = SensorDoor   = pin 13 / GPIO27
+%IX1.5 = SensorSound  = pin 37 / GPIO26
+
+OUTPUTS
+%QX0.7 = Motor1ToIN   = pin 32 / GPIO12
+%QX0.1 = Motor1ToOUT  = pin 10 / GPIO15
+%QX0.2 = Motor2ToIN   = pin 16 / GPIO23
+%QX0.3 = Motor2ToOUT  = pin 18 / GPIO24
+%QX0.4 = Lamp         = pin 22 / GPIO25
