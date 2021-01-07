@@ -1,0 +1,70 @@
+PROGRAM AutomaticDoors
+  VAR
+    SensorIN AT %IX0.2 : BOOL;
+    SensorOUT AT %IX0.3 : BOOL;
+    SensorDoor AT %IX0.4 : BOOL;
+    SensorSound AT %IX1.5 : BOOL;
+    Motor1ToIN AT %QX0.7 : BOOL;
+    Motor1ToOUT AT %QX1.2 : BOOL;
+    Motor2ToIN AT %QX0.2 : BOOL;
+    Motor2ToOUT AT %QX0.3 : BOOL;
+    Lamp AT %QX0.4 : BOOL;
+  END_VAR
+  VAR
+    Wait : BOOL;
+    Open : BOOL;
+    Close : BOOL;
+    TON0 : TON;
+    TON1 : TON;
+    TON2 : TON;
+    error : BOOL;
+    checkdoors : BOOL;
+    TON3 : TON;
+  END_VAR
+
+  IF NOT(checkdoors) AND NOT(error) AND NOT(Close) AND NOT(Wait) AND (SensorIN OR SensorOUT) THEN
+    Open := TRUE; (*set*)
+  END_IF;
+  Motor1ToOUT := Open;
+  Motor2ToOUT := Open;
+  TON0(IN := Open, PT := T#0.7s);
+  IF TON0.Q THEN
+    Wait := TRUE; (*set*)
+  END_IF;
+  IF TON0.Q THEN
+    Open := FALSE; (*reset*)
+  END_IF;
+  TON1(IN := NOT(SensorOUT) AND NOT(SensorIN) AND Wait, PT := T#4s);
+  IF TON1.Q THEN
+    Close := TRUE; (*set*)
+  END_IF;
+  IF TON1.Q THEN
+    Wait := FALSE; (*reset*)
+  END_IF;
+  Motor1ToIN := Close;
+  Motor2ToIN := Close;
+  TON2(IN := Close, PT := T#0.7s);
+  IF TON2.Q THEN
+    checkdoors := TRUE; (*set*)
+  END_IF;
+  IF TON2.Q THEN
+    Close := FALSE; (*reset*)
+  END_IF;
+  TON3(IN := checkdoors, PT := T#1s);
+  IF SensorDoor AND TON3.Q THEN
+    error := TRUE; (*set*)
+  END_IF;
+  IF NOT(SensorDoor) AND checkdoors THEN
+    checkdoors := FALSE; (*reset*)
+  END_IF;
+  Lamp := error;
+END_PROGRAM
+
+
+CONFIGURATION Config0
+
+  RESOURCE Res0 ON PLC
+    TASK task0(INTERVAL := T#20ms,PRIORITY := 0);
+    PROGRAM instance0 WITH task0 : AutomaticDoors;
+  END_RESOURCE
+END_CONFIGURATION
